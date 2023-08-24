@@ -100,7 +100,7 @@ export const signin = async (req, res) => {
         }
 		const sceretKey = process.env.JWT_SECRET
 
-        const token = JWT.sign({ _id: user._id },sceretKey);
+        const token = JWT.sign({ _id: user._id },sceretKey,{ expiresIn: '7d' });
         res.status(200).json({
             success: true,
             error: false,
@@ -130,12 +130,12 @@ const sendEmailVerificationLink = async (to, token, id) => {
 	console.log(to, token);
 	try {
 		const transporter = nodemailer.createTransport({
-			host: "smtp.ethereal.email",
+			host: 'smtp.ethereal.email',
 			port: 587,
 			auth: {
-				user: "lourdes.stamm21@ethereal.email",
-				pass: "thNuZQptSCNUV55Q8N",
-			},
+				user: 'arielle.schinner@ethereal.email',
+				pass: 'WpjTg4nvAabZmeKjuy'
+			}
 		});
 		await transporter.sendMail({
 			from: "admin@gmail.com",

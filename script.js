@@ -9,6 +9,7 @@ import authRoutes from "./routes/auth.js";
 import userRoutes from "./routes/user.js";
 import workspaceRoutes from "./routes/workspace.js";
 import otpRoutes from "./routes/otp.js";
+import {authHandler} from "./middlewares/auth.js";
 
 
 
@@ -26,7 +27,7 @@ app.use("/api/tags", tagRoutes);
 app.use("/api/notes", notesRoutes);
 app.use("/api/auth", authRoutes);
 app.use("/api/user", userRoutes);
-app.use("/api/workspace", workspaceRoutes);
+app.use("/api/workspace",authHandler, workspaceRoutes);
 app.use("/api/otp", otpRoutes);
 
 
