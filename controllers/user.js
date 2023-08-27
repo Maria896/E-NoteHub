@@ -19,7 +19,16 @@ export const getAllUsers = async (req, res) => {
 		res.status(400).json("Server Error");
 	}
 };
+const storage = multer.diskStorage({
+	destination: (req, file, cb) => {
+		cb(null, "uploads"); // Create 'uploads' directory in your project
+	},
+	filename: (req, file, cb) => {
+		cb(null, Date.now() + "-" + file.originalname);
+	},
+});
 
+export const upload = multer({ storage: storage });
 // Path     :   /api/notes/update-user/:id
 // Method   :   Put
 // Access   :   Private
@@ -28,16 +37,15 @@ export const updateUser = async (req, res) => {
 	try {
 		const id = req.params.id;
 		const { fullName, email, password } = req.body;
-		const img = req.body.profileImg;
-
-		console.log(img);
+		const fileName = req.file.filename;
+		console.log(fileName);
 
 		const updatedUser = await User.findByIdAndUpdate(
 			id,
 			{
 				fullName: fullName,
 				email: email,
-				profileImg: img,
+				profileImg: fileName,
 				password: password,
 			},
 			{
