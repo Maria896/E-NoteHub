@@ -1,6 +1,7 @@
 import Workspaces from "../schemas/workspaceSchema.js";
 import User from "../schemas/userSchema.js";
 import nodemailer from "nodemailer";
+import joiWorkspaceSchema from "../joiSchemas/workspaceSchema.js";
 
 // Path     :   /api/workspace/getAllWorkspaces
 // Method   :   Get
@@ -25,10 +26,16 @@ export const getAllWorkspaces = async (req, res) => {
 
 export const addWorkspace = async (req, res) => {
 	try {
-		const { name } = req.body;
+		const workspaceData = req.body;
+		const { error, value } = joiWorkspaceSchema.validate(workspaceData, { abortEarly: false });
+	  
+		if (error) {
+		  const errorMessage = error.details.map((detail) => detail.message);
+		  return res.status(400).json({ success: false, error: errorMessage });
+		}
 		const loggedInUserId = req.userId;
 		const newWorkspace = await new Workspaces({
-			name,
+			name: workspaceData.name,
 			user: loggedInUserId,
 		}).save();
 		// Return a success response
@@ -55,7 +62,7 @@ export const updateWorkspace = async (req, res) => {
 	const { name } = req.body;
 
 	try {
-		let workspaceData = await Workspaces.findOne({ id: workspaceId });
+		let workspaceData = await Workspaces.findOne({ _id: workspaceId });
 		console.log(workspaceData);
 
 		if (!workspaceData) {

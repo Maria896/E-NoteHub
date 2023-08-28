@@ -20,11 +20,11 @@ app.use(bodyParser.json());
 app.use(express.json());
 app.use(cors());
 
-app.use("/api/tags", tagRoutes);
-app.use("/api/notes", notesRoutes);
+app.use("/api/tags",authHandler, tagRoutes);
+app.use("/api/notes",authHandler, notesRoutes);
 app.use("/api/auth", authRoutes);
-app.use("/api/user", userRoutes);
-app.use("/api/workspace", workspaceRoutes);
+app.use("/api/user",authHandler,  userRoutes);
+app.use("/api/workspace", authHandler, workspaceRoutes);
 app.use("/api/otp", otpRoutes);
 
 const PORT = process.env.PORT || 3000;

@@ -1,5 +1,6 @@
 import Tags from "../schemas/tagsSchema.js";
 import mongoose from "mongoose";
+import joiTagSchema from "../joiSchemas/tagsSchema.js"
 
 // Path     :   /api/tags/addTag
 // Method   :   Post
@@ -8,9 +9,18 @@ import mongoose from "mongoose";
 
 export const addTag = async (req, res) => {
     try {
-        const { name } = req.body
+        const loggedInUserId = req.userId
+        const tagData = req.body
+        const { error, value } = joiTagSchema.validate(tagData, { abortEarly: false });
+	  
+		if (error) {
+		  const errorMessage = error.details.map((detail) => detail.message);
+		  return res.status(400).json({ success: false, error: errorMessage });
+		}
         const newTag = await new Tags({
-            name
+            name : tagData.name,
+            user : loggedInUserId ,
+            workspace: tagData.workspaceId 
         }).save()
         // Return a success response
         return res.status(200).json({ success: true, error: false, message: "Tag Added Successfully", newTag })
@@ -48,7 +58,7 @@ export const updateTag = async (req, res) => {
     const { name} = req.body
 
     try {
-        let tagData = await Tags.findOne({ id: tagId });
+        let tagData = await Tags.findOne({ _id: tagId });
         console.log(tagData)
         
         if (!tagData) {
@@ -77,7 +87,7 @@ export const deleteTag = async (req, res) => {
         const {tagId } = req.params;
         console.log(tagId)
 
-        let tag = await Tags.findOne({ id: tagId });
+        let tag = await Tags.findOne({ _id: tagId });
         console.log(tag)
         if (!tag) {
             return res.status(404).json({ message: 'Tag not found' });

@@ -2,6 +2,7 @@ import Notes from "../schemas/notesSchema.js";
 import { getAllTags, addTag } from "../controllers/tag.js";
 import Tags from "../schemas/tagsSchema.js";
 import mongoose from "mongoose";
+import joiNotesSchema from "../joiSchemas/notesSchema.js"
 
 // Path     :   /api/notes/addNote
 // Method   :   Post
@@ -11,7 +12,15 @@ import mongoose from "mongoose";
 export const addNote = async (req, res) => {
 	try {
 		const newTags = req.body.tags;
-		let { title, answers } = req.body;
+		const noteData = req.body;
+		const loggedInUserId = req.userId;
+		const workspaceId = req.workspaceId
+        const { error, value } = joiNotesSchema.validate(noteData, { abortEarly: false });
+	  
+		if (error) {
+		  const errorMessage = error.details.map((detail) => detail.message);
+		  return res.status(400).json({ success: false, error: errorMessage });
+		}
 		const createdTags = await createNewTagsIfNotExist(newTags);
 		const allTags = await Tags.find({});
 		const allSelectedOrNewTags = allTags.filter((obj) =>
@@ -20,10 +29,11 @@ export const addNote = async (req, res) => {
 
 		const tagIds = allSelectedOrNewTags.map((tag) => tag._id);
 		const newNote = await new Notes({
-			title,
-			answers,
-			tags: tagIds,
-			// user: "loggedInUserId",
+			title : noteData.title,
+			answers : noteData.answers,
+			tags : tagIds,
+			user : loggedInUserId,
+			workspace : noteData.workspace
 		}).save();
 		// Return a success response
 		return res.status(200).json({
@@ -70,7 +80,7 @@ export const updateNote = async (req, res) => {
 		const allChangedOrNewTags = [...fetchedTags, ...createdTags];
 		const tagIds = allChangedOrNewTags.map((tag) => tag._id);
 		const updatedNote = await Notes.findByIdAndUpdate(
-			id,
+			_id,
 			{ title: title, answers: answers, tags: tagIds },
 			{
 				new: true,
@@ -98,7 +108,7 @@ export const deleteNote = async (req, res) => {
 		const { noteId } = req.params;
 		console.log(noteId);
 
-		let note = await Tags.findOne({ id: noteId });
+		let note = await Tags.findOne({ _id: noteId });
 		console.log(note);
 		if (!note) {
 			return res.status(404).json({ message: "Note not found" });

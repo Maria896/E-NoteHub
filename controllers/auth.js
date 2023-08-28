@@ -4,74 +4,77 @@ import bcrypt from "bcrypt";
 import nodemailer from "nodemailer";
 import Workspace from "../schemas/workspaceSchema.js";
 import JWT from "jsonwebtoken";
+import joiUserSchema from "../joiSchemas/userSchema.js"
 
 // Path     :   /api/auth/signup
 // Method   :   Post
-// Access   :   Private
+// Access   :   Public
 // Desc     :   Register New User
 export const signup = async (req, res) => {
-	const { fullName, email, password } = req.body;
-	console.log(email);
+
+	const userData = req.body;
+	
+	console.log(userData.email);
 	try {
-		const existedUser = await User.find({ email: email });
-		console.log(existedUser);
-		if (!existedUser) {
-			if (existedUser.isVerified) {
-				return res.status(400).json({
-					success: false,
-					error: true,
-					message: "User already exists please try another email",
-				});
-			} else {
-				await sendEmailVerificationLink(
-					existedUser.email,
-					existedUser.verificationToken,
-					existedUser._id
-				);
-
-				res.status(200).json({
-					success: true,
-					error: false,
-					message:
-						"Signup successful. Please check your email to verify your account.",
-					user,
-				});
-			}
-		} else {
-			const verificationToken = generateVerificationToken();
-			const hashPassword = hashedPassword(password);
-
-			const user = await new User({
-				fullName,
-				email,
-				password: hashPassword,
-				verificationToken: verificationToken,
-				isVerified: false,
-			}).save();
-			await sendEmailVerificationLink(
-				user.email,
-				user.verificationToken,
-				user._id
-			);
-
-			res.status(200).json({
-				success: true,
-				error: false,
-				message:
-					"Signup successful. Please check your email to verify your account.",
-				user,
-			});
+		const { error, value } = joiUserSchema.validate(userData, { abortEarly: false });
+	  
+		if (error) {
+		  const errorMessage = error.details.map((detail) => detail.message);
+		  return res.status(400).json({ success: false, error: errorMessage });
 		}
-	} catch (err) {
+	  
+		const existedUser = await User.findOne({ email: userData.email });
+	  
+		if (existedUser) {
+		  if (existedUser.isVerified) {
+			return res.status(400).json({
+			  success: false,
+			  error: true,
+			  message: "User already exists please try another email",
+			});
+		  } else {
+			await sendEmailVerificationLink(
+			  existedUser.email,
+			  existedUser.verificationToken,
+			  existedUser._id
+			);
+	  
+			res.status(200).json({
+			  success: true,
+			  error: false,
+			  message: "Signup successful. Please check your email to verify your account.",
+			});
+		  }
+		} else {
+		  const verificationToken = generateVerificationToken();
+		  const hashPassword = hashedPassword(userData.password);
+	  
+		  const user = await new User({
+			fullName: userData.fullName,
+			email: userData.email,
+			password: hashPassword,
+			verificationToken: verificationToken,
+			isVerified: false,
+		  }).save();
+	  
+		  await sendEmailVerificationLink(user.email, user.verificationToken, user._id);
+	  
+		  res.status(200).json({
+			success: true,
+			error: false,
+			message: "Signup successful. Please check your email to verify your account.",
+			user,
+		  });
+		}
+	  } catch (err) {
 		console.log(err);
-		res
-			.status(500)
-			.json({ success: false, error: err, message: "Network error" });
-	}
+		res.status(500).json({ success: false, error: err, message: "Network error" });
+	  }
+	  
 };
 // Path     :   /api/auth/verify/:id/:token
 // Method   :   Get
-// Access   :   Private
+// Access   :   Public
 // Desc     :   Verifiy email of new user
 export const verifyEmail = async (req, res) => {
 	try {
@@ -102,19 +105,14 @@ export const verifyEmail = async (req, res) => {
 
 // Path     :   /api/auth/signin
 // Method   :   Post
-// Access   :   Private
+// Access   :   Public
 // Desc     :   Login User
 export const signin = async (req, res) => {
-	const { email, password } = req.body;
-	const user = await User.findOne({ email: email });
+	const userData = req.body;
+	console.log(userData.password)
+	const user = await User.findOne({ email: userData.email });
 	try {
-		if (!email || !password) {
-			return res.status(400).json({
-				success: false,
-				error: true,
-				message: "Email and Password is required",
-			});
-		}
+		
 		if (!user) {
 			return res.status(400).json({
 				success: false,
@@ -122,7 +120,7 @@ export const signin = async (req, res) => {
 				message: "Email is not registered",
 			});
 		}
-		const compare = bcrypt.compareSync(password, user.password);
+		const compare = bcrypt.compareSync(userData.password, user.password);
 		if (!compare) {
 			return res.status(400).json({
 				success: false,
@@ -171,12 +169,12 @@ const sendEmailVerificationLink = async (to, token, id) => {
 	console.log(to, token);
 	try {
 		const transporter = nodemailer.createTransport({
-			host: "smtp.ethereal.email",
+			host: 'smtp.ethereal.email',
 			port: 587,
 			auth: {
-				user: "arielle.schinner@ethereal.email",
-				pass: "WpjTg4nvAabZmeKjuy",
-			},
+				user: 'kaden.funk98@ethereal.email',
+				pass: 'arnQA8aucvc5cWKwwE'
+			}
 		});
 		await transporter.sendMail({
 			from: "admin@gmail.com",
