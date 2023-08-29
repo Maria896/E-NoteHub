@@ -1,0 +1,102 @@
+swagger: "2.0"
+info:
+  title: E-NoteHub APIs Documentation
+  description: A E-NoteHub application is a software tool designed to help users create, manage, and organize notes
+  version: 1.0
+  contact:
+    email: enotehub@gmail.com
+  servers:
+    -url: http://localhost:5000
+    description: My local Server
+schemes: [https,http]
+
+paths:
+  /api/user/:
+    get:
+      summary: Get all users
+      description: Retrieves a list of all users.
+      responses:
+        200:
+          description: Successful response
+          schema:
+            type: array
+            items:
+              $ref: "#/definitions/User"
+        500:
+          description: Internal server error
+definitions:
+  User:
+    type: object
+    properties:
+      _id:
+        type: string
+      fullName:
+        type: string
+      email:
+        type: string 
+      profileImg:
+        type: string 
+      verificationToken:
+        type: string
+      isVerified:
+        type: boolean
+  Note:
+    type: object
+    properties:
+      _id:
+        type: string
+      title:
+        type: string
+      answers:
+        type: array
+        items:
+          type: string
+      tags:
+        type: array
+        items:
+          $ref: "#/definitions/Tag"
+      user:
+        $ref: "#/definitions/User"
+      workspace:
+        $ref: "#/definitions/Workspace"
+      createdAt:
+        type: string
+        format: date-time
+
+  Workspace:
+    type: object
+    properties:
+      _id:
+        type: string
+      name:
+        type: string
+      creator:
+        $ref: "#/definitions/User"
+      collaborators:
+        type: array
+        items:
+          $ref: "#/definitions/User"
+  Tag:
+    type: object
+    properties:
+      _id:
+        type: string
+      name:
+        type: string
+      user:
+        $ref: "#/definitions/User"
+      workspace:
+        $ref: "#/definitions/Workspace"
+  OTP:
+    type: object
+    properties:
+      _id:
+        type: string
+      email:
+        type: string
+      otp:
+        type: string
+      createdAt:
+        type: string
+        format: date-time                    
+                    
