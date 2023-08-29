@@ -13,7 +13,7 @@ export const sendOtp = async (req, res) => {
     const otpDoc = new OTP({ email, otp });
     await otpDoc.save();
     await sendOtpCodeInEmail(email, otp);
-    res.status(200).json({ message: "OTP sent successfully" });
+    res.status(200).json({ otpDoc,message: "OTP sent successfully" });
   } catch (err) {
     console.error(err);
     res.status(500).json({ message: "Failed to send OTP" });
@@ -27,12 +27,16 @@ export const sendOtp = async (req, res) => {
 // Desc     :   Verify OTP Code
 export const verifyOtp = async (req, res) => {
   const { email, otp } = req.body;
-  console.log(email)
-  const otpDoc = await OTP.find({ email: email });
-  console.log(otpDoc)
-  if ( otpDoc.otp !== otp) {
-    return res.status(400).send("Invalid OTP");
-  }
+
+    const otpDoc = await OTP.findOne({ email: email });
+
+    if (!otpDoc) {
+      return res.status(400).json({ error: "OTP document not found for the email" });
+    }
+
+    if (otpDoc.otp !== otp) {
+      return res.status(401).json({ error: "Invalid OTP" });
+    }
   await otpDoc.deleteOne();
   res.status(200).json({ message: "OTP verified successfully" });
 };
@@ -42,13 +46,13 @@ const sendOtpCodeInEmail = async (to, otpCode) => {
   console.log(to, otpCode);
   try {
     const transporter = nodemailer.createTransport({
-        host: 'smtp.ethereal.email',
-        port: 587,
-        auth: {
-            user: 'blanca.reilly24@ethereal.email',
-            pass: 'Smmy3dNAcQfpgwCcAP'
-        }
-    });
+      host: 'smtp.ethereal.email',
+      port: 587,
+      auth: {
+          user: 'jonathon5@ethereal.email',
+          pass: '64upnVYRD28gEkpjrR'
+      }
+  });
     await transporter.sendMail({
       from: "admin@gmail.com",
       to: to,
