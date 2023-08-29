@@ -74,7 +74,24 @@ definitions:
     properties:
       name:
         type: string
-        description: The name of the new workspace     
+        description: The name of the new workspace
+  UpdatedWorkspace:
+    type: object
+    properties:
+      name:
+        type: string
+        description: New name for the workspace (optional)
+      collaborators:
+        type: array
+        items:
+          type: string
+        description: New list of collaborator IDs (optional)
+  AddCollaborator:
+    type: object
+    properties:
+      email:
+        type: string
+        description: Add New collaborator for the workspace                  
   Tag:
     type: object
     properties:
@@ -283,6 +300,7 @@ paths:
           description: Unauthorized (invalid OTP)
         500:
           description: Internal server error
+  # Add new Workspace API        
   /api/workspace/add-workspace:
     post:
       summary: Add a new workspace
@@ -331,5 +349,77 @@ paths:
             items:
               $ref: "#/definitions/Workspace"
         500:
-          description: Internal server error        
-
+          description: Internal server error
+  #Update workspace API               
+  /api/workspace/update-workspace/{id}:
+    put:
+      summary: Update Workspace
+      description: Update an existing workspace's information.
+      parameters:
+        - in: path
+          name: id
+          schema:
+            type: string
+          required: true
+          description: ID of the workspace to update
+        - in: body
+          name: UpdatedWorkspace
+          description: Updated workspace name
+          schema:
+            $ref: '#/definitions/UpdatedWorkspace'
+      responses:
+        200:
+          description: Workspace updated successfully
+        400:
+          description: Bad request
+        404:
+          description: Workspace not 
+  #Delete workspace by ID
+  /api/workspace/delete-workspace/{id}:
+    delete:
+      summary: Delete a Workspace
+      description: Delete a workspace by its ID.
+      parameters:
+        - in: path
+          name: id
+          schema:
+            type: string
+          required: true
+          description: Workspace ID
+      responses:
+        200:
+          description: Workspace deleted successfully
+        400:
+          description: Bad request
+        404:
+          description: Workspace not found
+  #Add Collaborator in workspace 
+  /api/workspace/add-collaborator/{id}:
+    put:
+      summary: Add Collaborator to Workspace
+      description: Add a collaborator to a workspace by its ID.
+      parameters:
+        - in: path
+          name: id
+          schema:
+            type: string
+          required: true
+          description: Workspace ID
+        - in: body
+          name: AddCollaborator
+          type: string
+          description: Email of the collaborator to add
+          schema:
+            $ref: '#/definitions/AddCollaborator'
+          required: true
+      responses:
+        200:
+          description: Collaborator added successfully
+        400:
+          description: Bad request
+        404:
+          description: Workspace not found                    
+      consumes:
+        - application/json
+      produces:
+        - application/json

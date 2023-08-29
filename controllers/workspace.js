@@ -27,6 +27,7 @@ export const getAllWorkspaces = async (req, res) => {
 export const addWorkspace = async (req, res) => {
 	try {
 		const workspaceData = req.body;
+		console.log(workspaceData,req.userId)
 		const { error, value } = joiWorkspaceSchema.validate(workspaceData, { abortEarly: false });
 	  
 		if (error) {
@@ -36,7 +37,7 @@ export const addWorkspace = async (req, res) => {
 		const loggedInUserId = req.userId;
 		const newWorkspace = await new Workspaces({
 			name: workspaceData.name,
-			user: loggedInUserId,
+			creator : loggedInUserId,
 		}).save();
 		// Return a success response
 		return res.status(200).json({
@@ -115,6 +116,7 @@ export const addCollaborator = async (req, res) => {
 	console.log(req.params.id);
 	const { email } = req.body;
 	const collaborator = await User.findOne({ email: email });
+	console.log(collaborator)
 	if (!collaborator) {
 		return res.status(404).json({ message: "Send Registration link" });
 	} else {
