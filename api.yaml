@@ -69,6 +69,12 @@ definitions:
         type: array
         items:
           $ref: "#/definitions/User"
+  NewWorkspace:
+    type: object
+    properties:
+      name:
+        type: string
+        description: The name of the new workspace     
   Tag:
     type: object
     properties:
@@ -277,5 +283,53 @@ paths:
           description: Unauthorized (invalid OTP)
         500:
           description: Internal server error
-          
+  /api/workspace/add-workspace:
+    post:
+      summary: Add a new workspace
+      description: Add a new workspace with the logged-in user as the creator.
+      consumes:
+        - application/json
+      produces:
+        - application/json
+      parameters:
+        - in: header
+          name: Authorization
+          type: string
+          required: true
+          description: Bearer token for authentication
+        - in: body
+          name: workspace
+          description: Workspace object to add
+          required: true
+          schema:
+            $ref: '#/definitions/NewWorkspace'
+      responses:
+        201:
+          description: Workspace added successfully
+          schema:
+            $ref: '#/definitions/Workspace'
+        400:
+          description: Bad request
+        500:
+          description: Internal server error
+  #Get All Workspaces
+  /api/workspace/:
+    get:
+      summary: Get all Workspaces
+      description: Retrieves a list of all workspaces.
+      parameters:
+        - in: header
+          name: Authorization
+          type: string
+          required: true
+          description: Bearer token for authentication
+      responses:
+        200:
+          description: Successful response
+          schema:
+            type: array
+            items:
+              $ref: "#/definitions/Workspace"
+        500:
+          description: Internal server error        
 
