@@ -55,7 +55,50 @@ definitions:
       createdAt:
         type: string
         format: date-time
-
+  NewNote:
+    type: object
+    properties:
+      title:
+        type: string
+        description: The title of the note
+      answers:
+        type: array
+        description: List of answers
+        items:
+          type: string
+      tags:
+        type: array
+        description: List of tag IDs associated with the note
+        items:
+          type: string
+      user:
+        type: string
+        description: User ID associated with the note
+      workspace:
+        type: string
+        description: Workspace ID associated with the note
+  UpdatedNote:
+    type: object
+    properties:
+      title:
+        type: string
+        description: The updated title of the note
+      answers:
+        type: array
+        items:
+          type: string
+        description: The updated answers of the note
+      tags:
+        type: array
+        items:
+          type: string
+        description: List of tag names associated with the note
+      user:
+        type: string
+        description: The user ID associated with the note
+      workspace:
+        type: string
+        description: The workspace ID associated with the note              
   Workspace:
     type: object
     properties:
@@ -103,6 +146,19 @@ definitions:
         $ref: "#/definitions/User"
       workspace:
         $ref: "#/definitions/Workspace"
+  #Add NewTag definition
+  NewTag:
+    type: object
+    properties:
+      name:
+        type: string
+        description: The name of the tag 
+  UpdatedTag:
+    type: object
+    properties:
+      name:
+        type: string
+        description: New name for the Tag       
   OTP:
     type: object
     properties:
@@ -356,6 +412,12 @@ paths:
       summary: Update Workspace
       description: Update an existing workspace's information.
       parameters:
+        - in: header
+          name: Authorization
+          schema:
+            type: string
+          required: true
+          description: Bearer token with the JWT for authorization
         - in: path
           name: id
           schema:
@@ -380,6 +442,12 @@ paths:
       summary: Delete a Workspace
       description: Delete a workspace by its ID.
       parameters:
+        - in: header
+          name: Authorization
+          schema:
+            type: string
+          required: true
+          description: Bearer token with the JWT for authorization
         - in: path
           name: id
           schema:
@@ -399,6 +467,12 @@ paths:
       summary: Add Collaborator to Workspace
       description: Add a collaborator to a workspace by its ID.
       parameters:
+        - in: header
+          name: Authorization
+          schema:
+            type: string
+          required: true
+          description: Bearer token with the JWT for authorization
         - in: path
           name: id
           schema:
@@ -423,3 +497,212 @@ paths:
         - application/json
       produces:
         - application/json
+  # Add Tag API
+  /api/tags/add-tag:
+    post:
+      summary: Add a Tag
+      description: Add a new tag with user and workspace references.
+      consumes:
+        - application/json
+      produces:
+        - application/json
+      parameters:
+        - in: header
+          name: Authorization
+          schema:
+            type: string
+          required: true
+          description: Bearer token with the JWT for authorization
+        - in: body
+          name: NewTag
+          type: string
+          description: Name of the new Tag
+          schema:
+            $ref: '#/definitions/NewTag'
+          required: true
+      responses:
+        200:
+          description: Tag added successfully
+        400:
+          description: Bad request
+        401:
+          description: Unauthorized 
+  #Get All Tags
+  /api/tags/:
+    get:
+      summary: Get all Tags
+      description: Retrieves a list of all Tags.
+      parameters:
+        - in: header
+          name: Authorization
+          type: string
+          required: true
+          description: Bearer token for authentication
+      responses:
+        200:
+          description: Successful response
+          schema:
+            type: array
+            items:
+              $ref: "#/definitions/Tags"
+        500:
+          description: Internal server error
+  #Update Tag API               
+  /api/tags/update-tag/{id}:
+    put:
+      summary: Update Tag
+      description: Update an existing Tag.
+      parameters:
+        - in: header
+          name: Authorization
+          type: string
+          required: true
+          description: Bearer token for authentication
+        - in: path
+          name: id
+          schema:
+            type: string
+          required: true
+          description: ID of the tag to update
+        - in: body
+          name: UpdatedTag
+          description: Updated tag name
+          schema:
+            $ref: '#/definitions/UpdatedTag'
+      responses:
+        200:
+          description: Tag updated successfully
+        400:
+          description: Bad request
+        404:
+          description: Workspace not
+  #Delete Tag by ID
+  /api/tags/delete-tag/{id}:
+    delete:
+      summary: Delete a Tag
+      description: Delete a tag by its ID.
+      parameters:
+        - in: header
+          name: Authorization
+          type: string
+          required: true
+          description: Bearer token for authentication
+        - in: path
+          name: id
+          schema:
+            type: string
+          required: true
+          description: Tag ID
+      responses:
+        200:
+          description: Tag deleted successfully
+        400:
+          description: Bad request
+        404:
+          description: Tag not found
+  #Add Note API      
+  /api/notes/add-note:
+    post:
+      summary: Add a Note
+      description: Add a new note with answers, tags, user, and workspace references.
+      parameters:
+        - in: header
+          name: Authorization
+          schema:
+            type: string
+          required: true
+          description: Bearer token with the JWT for authorization
+        - in: body
+          name: NewNote
+          description: Note data to be added
+          required: true
+          schema:
+            $ref: "#/definitions/NewNote"
+      responses:
+        200:
+          description: Note added successfully
+        400:
+          description: Bad request
+        401:
+          description: Unauthorized
+  #Update Existing Note API
+  /api/notes/update-note/{id}:
+    put:
+    summary: Update a Note
+    description: Update an existing note by its ID.
+    parameters:
+      - in: header
+        name: Authorization
+        schema:
+          type: string
+        required: true
+        description: Bearer token with the JWT for authorization
+      - in: path
+        name: id
+        schema:
+          type: string
+        required: true
+        description: Note ID
+      - in: body
+        name: UpdatedNote
+        description: Note data to be updated
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/definitions/UpdatedNote"
+    responses:
+      200:
+        description: Note updated successfully
+      400:
+        description: Bad request
+      404:
+        description: Note not found
+      500:
+        description: Server error
+        
+  #Get All Notes
+  /api/notes/:
+    get:
+      summary: Get all Notes
+      description: Retrieves a list of all Notes.
+      parameters:
+        - in: header
+          name: Authorization
+          type: string
+          required: true
+          description: Bearer token for authentication
+      responses:
+        200:
+          description: Successful response
+          schema:
+            type: array
+            items:
+              $ref: "#/definitions/Notes"
+        500:
+          description: Internal server error
+  #Delete Tag by ID
+  /api/notes/delete-note/{id}:
+    delete:
+      summary: Delete a Note
+      description: Delete a Note by its ID.
+      parameters:
+        - in: header
+          name: Authorization
+          type: string
+          required: true
+          description: Bearer token for authentication
+        - in: path
+          name: id
+          schema:
+            type: string
+          required: true
+          description: Note ID
+      responses:
+        200:
+          description: Note deleted successfully
+        400:
+          description: Bad request
+        404:
+          description: Note not found         
+  

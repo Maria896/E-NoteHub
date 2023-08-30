@@ -108,7 +108,7 @@ export const deleteNote = async (req, res) => {
 		const { noteId } = req.params;
 		console.log(noteId);
 
-		let note = await Tags.findOne({ _id: noteId });
+		let note = await Tags.findOne({ id: noteId });
 		console.log(note);
 		if (!note) {
 			return res.status(404).json({ message: "Note not found" });

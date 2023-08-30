@@ -11,16 +11,19 @@ export const addTag = async (req, res) => {
     try {
         const loggedInUserId = req.userId
         const tagData = req.body
+        console.log(tagData);
         const { error, value } = joiTagSchema.validate(tagData, { abortEarly: false });
+        console.log(loggedInUserId)
 	  
 		if (error) {
 		  const errorMessage = error.details.map((detail) => detail.message);
 		  return res.status(400).json({ success: false, error: errorMessage });
+          console.log(tagData);
 		}
         const newTag = await new Tags({
             name : tagData.name,
             user : loggedInUserId ,
-            workspace: tagData.workspaceId 
+            workspace: tagData.workspace
         }).save()
         // Return a success response
         return res.status(200).json({ success: true, error: false, message: "Tag Added Successfully", newTag })
@@ -87,7 +90,7 @@ export const deleteTag = async (req, res) => {
         const {tagId } = req.params;
         console.log(tagId)
 
-        let tag = await Tags.findOne({ _id: tagId });
+        let tag = await Tags.findOne({ id: tagId });
         console.log(tag)
         if (!tag) {
             return res.status(404).json({ message: 'Tag not found' });
