@@ -37,15 +37,19 @@ export const updateUser = async (req, res) => {
 	try {
 		const id = req.params.id;
 		const { fullName, email, password } = req.body;
-		const fileName = req.file.filename;
-		console.log(fileName);
+		let profileImgFilename;
+		if (req.file) {
+			profileImgFilename = req.file.filename;
+		}
+		// const fileName = req.file.filename;
+		// console.log(fileName);
 
 		const updatedUser = await User.findByIdAndUpdate(
 			id,
 			{
 				fullName: fullName,
 				email: email,
-				profileImg: fileName,
+				profileImg: profileImgFilename,
 				password: password,
 			},
 			{
