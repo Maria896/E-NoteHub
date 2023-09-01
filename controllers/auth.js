@@ -27,7 +27,7 @@ export const signup = async (req, res) => {
 	  
 		if (existedUser) {
 		  if (existedUser.isVerified) {
-			return res.status(400).json({
+			return res.status(409).json({
 			  success: false,
 			  error: true,
 			  message: "User already exists please try another email",
@@ -82,7 +82,7 @@ export const verifyEmail = async (req, res) => {
 		console.log(req.params.id);
 		const user = await User.find({ id: id });
 		console.log(user);
-		if (!user) return res.status(400).json("Invalid link");
+		if (!user) return res.status(404).json("Invalid link");
 		const verifiedUser = await User.findByIdAndUpdate(
 			id,
 			{ isVerified: true },
@@ -114,7 +114,7 @@ export const signin = async (req, res) => {
 	try {
 		
 		if (!user) {
-			return res.status(400).json({
+			return res.status(401).json({
 				success: false,
 				error: true,
 				message: "Email is not registered",
@@ -122,17 +122,10 @@ export const signin = async (req, res) => {
 		}
 		const compare = bcrypt.compareSync(userData.password, user.password);
 		if (!compare) {
-			return res.status(400).json({
+			return res.status(401).json({
 				success: false,
 				error: true,
 				message: "Invalid password please enter valid password",
-			});
-		}
-		if (!user.isVerified) {
-			return res.status(400).json({
-				success: false,
-				error: true,
-				message: "Please verify your email",
 			});
 		}
 		const sceretKey = process.env.JWT_SECRET;
@@ -141,7 +134,7 @@ export const signin = async (req, res) => {
 		res.status(200).json({
 			success: true,
 			error: false,
-			message: "Login successfully",
+			message: "Login successful.",
 			token: token,
 			user: user,
 		});

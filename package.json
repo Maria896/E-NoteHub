@@ -7,7 +7,7 @@
   "scripts": {
     "start": "script",
     "server": "nodemon script",
-    "test": "echo \"Error: no test specified\" && exit 1"
+    "test": "mocha"
   },
   "keywords": [],
   "author": "",
@@ -31,6 +31,9 @@
     "yamljs": "^0.3.0"
   },
   "devDependencies": {
+    "chai": "^4.3.8",
+    "chai-http": "^4.4.0",
+    "mocha": "^10.2.0",
     "nodemon": "^3.0.1"
   }
 }
