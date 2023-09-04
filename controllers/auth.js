@@ -80,7 +80,7 @@ export const verifyEmail = async (req, res) => {
 	try {
 		const id = req.params.id;
 		console.log(req.params.id);
-		const user = await User.find({ id: id });
+		const user = await User.find({ _id: id });
 		console.log(user);
 		if (!user) return res.status(404).json("Invalid link");
 		const verifiedUser = await User.findByIdAndUpdate(

@@ -53,7 +53,7 @@ export const addWorkspace = async (req, res) => {
 	}
 };
 
-// Path     :   /api/workspace/update-workspace
+// Path     :   /api/workspace/update-workspace/:id
 // Method   :   Put
 // Access   :   Private
 // Desc     :   Update Workspace
@@ -78,11 +78,11 @@ export const updateWorkspace = async (req, res) => {
 	} catch (error) {
 		// Return an error response if an error occurs
 		console.error(error);
-		return res.status(500).json({ message: "Server error." });
+		return res.json({ message: "Server error." });
 	}
 };
 
-// Path     :   /api/workspace/delete-workspace
+// Path     :   /api/workspace/delete-workspace/:id
 // Method   :   Delete
 // Access   :   Private
 // Desc     :   Delete Workspace
@@ -92,18 +92,18 @@ export const deleteWorkspace = async (req, res) => {
 		const { workspaceId } = req.params;
 		console.log(workspaceId);
 
-		let workspace = await Workspaces.findOne({ id: workspaceId });
+		let workspace = await Workspaces.findOne({ _id: workspaceId });
 		console.log(workspace);
 		if (!workspace) {
 			return res.status(404).json({ message: "Workspace not found" });
 		}
 		await workspace.deleteOne();
 		// Return a success response
-		res.json({ message: "Workspace deleted successfully" });
+		res.status(200).json({ message: "Workspace deleted successfully" });
 	} catch (err) {
 		// Return an error response if an error occurs
 		console.error(err);
-		res.status(500).json({ message: "Server error" });
+		res.json({ message: "Server error" });
 	}
 };
 

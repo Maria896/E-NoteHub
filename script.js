@@ -24,7 +24,7 @@ app.use(express.json());
 app.use(cors());
 app.use("/api-docs", swaggerUI.serve, swaggerUI.setup(swaggerJSDocs));
 
-app.use("/api/tags",authHandler, tagRoutes);
+app.use("/api/tags", tagRoutes);
 app.use("/api/notes",authHandler, notesRoutes);
 app.use("/api/auth", authRoutes);
 app.use("/api/user",  userRoutes);
