@@ -89,10 +89,10 @@ export const updateWorkspace = async (req, res) => {
 
 export const deleteWorkspace = async (req, res) => {
 	try {
-		const { workspaceId } = req.params;
-		console.log(workspaceId);
+		const id = req.params.id;
+		console.log(id);
 
-		let workspace = await Workspaces.findOne({ _id: workspaceId });
+		let workspace = await Workspaces.findOne({ _id: id });
 		console.log(workspace);
 		if (!workspace) {
 			return res.status(404).json({ message: "Workspace not found" });

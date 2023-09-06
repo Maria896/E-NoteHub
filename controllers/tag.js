@@ -87,17 +87,17 @@ export const updateTag = async (req, res) => {
 
 export const deleteTag = async (req, res) => {
     try {
-        const {tagId } = req.params;
-        console.log(tagId)
+        const id = req.params.id;
+        console.log(id)
 
-        let tag = await Tags.findOne({ id: tagId });
+        let tag = await Tags.findOne({ _id: id });
         console.log(tag)
         if (!tag) {
             return res.status(404).json({ message: 'Tag not found' });
         }
         await tag.deleteOne();
         // Return a success response
-        res.json({ message: 'Tag deleted successfully' });
+        res.json({ message: 'Tag deleted successfully',tag });
     } catch (err) {
         // Return an error response if an error occurs
         console.error(err);
