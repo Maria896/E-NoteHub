@@ -4,7 +4,7 @@ import app from "../script.js";
 const should = chai.should();
 
 chai.use(chaiHttp);
-
+let createdWorkspaceId;
 describe("Workspace Routes", function () {
 	it("should return a list of workspaces", function (done) {
 		chai
@@ -15,7 +15,7 @@ describe("Workspace Routes", function () {
 				done();
 			});
 	}).timeout(10000);
-	let createdWorkspaceId;
+	
 	it("should create a new workspace", function (done) {
 		chai
 			.request(app)

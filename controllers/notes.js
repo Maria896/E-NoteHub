@@ -40,6 +40,7 @@ export const addNote = async (req, res) => {
 			success: true,
 			error: false,
 			message: "Note Added Successfully",
+			newNote
 		});
 	} catch (error) {
 		// Return an error response if an error occurs
@@ -80,7 +81,7 @@ export const updateNote = async (req, res) => {
 		const allChangedOrNewTags = [...fetchedTags, ...createdTags];
 		const tagIds = allChangedOrNewTags.map((tag) => tag._id);
 		const updatedNote = await Notes.findByIdAndUpdate(
-			_id,
+			id,
 			{ title: title, answers: answers, tags: tagIds },
 			{
 				new: true,
@@ -127,6 +128,7 @@ export const deleteNote = async (req, res) => {
 
 const createNewTagsIfNotExist = async (newTags) => {
 	//const existedTags = await Tags.find({});
+	let tags = [];
 	for (const tagName of newTags) {
 		// Check if the tag name already exists
 		const tagExists = await Tags.findOne({ name: tagName });
@@ -136,10 +138,12 @@ const createNewTagsIfNotExist = async (newTags) => {
 			// Create a new tag in the database
 			const newTag = { name: tagName };
 			new Tags(newTag).save();
+			tags.push(newTag.name);
 
 			console.log(`New tag "${tagName}" created in the database.`);
 		} else {
 			console.log(`Tag "${tagName}" already exists.`);
 		}
 	}
+	return newTags;
 };

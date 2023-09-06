@@ -1,10 +1,12 @@
 import chai from "chai";
 import chaiHttp from "chai-http";
 import app from "../script.js";
+import { loggedInUserToken } from "./auth.test.js";
 const should = chai.should();
 
 chai.use(chaiHttp);
 
+let createdTagId;
 describe("Tag Routes", function () {
   it("should return a list of Tags", function (done) {
     chai
@@ -15,7 +17,7 @@ describe("Tag Routes", function () {
         done();
       });
   }).timeout(10000);
-  let createdTagId;
+  
   it("should create a new tag", function (done) {
     chai
       .request(app)
@@ -69,13 +71,13 @@ describe("Tag Routes", function () {
       });
   }).timeout(10000);
 
-//   it("should return error for invalid tag id ", function (done) {
-//     chai
-//       .request(app)
-//       .delete(`/api/tags/delete-tag/${invalidTagId}`)
-//       .end((err, res) => {
-//         res.should.have.status(404);
-//         done();
-//       });
-//   }).timeout(10000);
+  it("should return error for invalid tag id ", function (done) {
+    chai
+      .request(app)
+      .delete(`/api/tags/delete-tag/${invalidTagId}`)
+      .end((err, res) => {
+        res.should.have.status(404);
+        done();
+      });
+  }).timeout(10000);
 });

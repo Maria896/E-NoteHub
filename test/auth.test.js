@@ -6,7 +6,8 @@ import User from "../schemas/userSchema.js";
 const should = chai.should();
 
 chai.use(chaiHttp);
-
+export let loggedInUserId ;
+export let loggedInUserToken;
 describe("Signup and Signin API", () => {
 	const testUser = {
 		fullName: `testuser-${Date.now()}`,
@@ -72,6 +73,8 @@ describe("Signup and Signin API", () => {
 				.send({ email: testUser.email, password: testUser.password })
 				.end((err, res) => {
 					res.should.have.status(200);
+					loggedInUserId = res.body.user._id;
+					loggedInUserToken = res.body.user.token;
 					done();
 				});
 		}).timeout(5000);
@@ -99,13 +102,13 @@ describe("Signup and Signin API", () => {
 		}).timeout(5000);
 	});
 	// Delete created users after the tests
-	after(async () => {
-		try {
-			await User.deleteMany({
-				email: /^testuser-/,
-			});
-		} catch (error) {
-			console.error("Error deleting users:", error);
-		}
-	});
+	// after(async () => {
+	// 	try {
+	// 		await User.deleteMany({
+	// 			email: /^testuser-/,
+	// 		});
+	// 	} catch (error) {
+	// 		console.error("Error deleting users:", error);
+	// 	}
+	// });
 });
