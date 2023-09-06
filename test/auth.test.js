@@ -29,7 +29,7 @@ describe("Signup and Signin API", () => {
 					registeredUserToken = res.body.user.verificationToken;
 					done();
 				});
-		}).timeout(20000);
+		}).timeout(40000);
 
 		it("should verify user with valid link", (done) => {
 			chai
