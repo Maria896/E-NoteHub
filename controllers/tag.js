@@ -22,7 +22,7 @@ export const addTag = async (req, res) => {
 		}
         const newTag = await new Tags({
             name : tagData.name,
-            user : loggedInUserId ,
+            creator : loggedInUserId ,
             workspace: tagData.workspace
         }).save()
         // Return a success response
@@ -42,7 +42,10 @@ export const addTag = async (req, res) => {
 
 export const getAllTags = async (req, res) => {
     try {
-        const tags = await Tags.find({});
+        
+        const loggedInUserId = req.userId;
+
+        const tags = await Tags.find({creator: loggedInUserId});
         // Return a success response
         res.status(200).json({ success: true, error: false, tags })
     } catch (error) {
@@ -51,13 +54,14 @@ export const getAllTags = async (req, res) => {
     }
 }
 
-// Path     :   /api/tags/update-tag
+// Path     :   /api/tags/update-tag/:id
 // Method   :   Put
 // Access   :   Private
 // Desc     :   Update Tag
 export const updateTag = async (req, res) => {
 
     const tagId  = req.params.id;
+    const loggedInUserId = req.userId;
     const { name} = req.body
 
     try {
@@ -67,12 +71,17 @@ export const updateTag = async (req, res) => {
         if (!tagData) {
             return res.status(404).json({ message: 'Tag not found.' });
         }
+        if ((tagData.creator = loggedInUserId)) {
+
         tagData.name = name,
         
         await tagData.save();
 
         // Return a success response
         return res.status(200).json({ tagData, message: 'Tag updated successfully.' });
+        }else {
+            return res.status(401).json({ message: "Unauthorized User" });
+          }
     } catch (error) {
         // Return an error response if an error occurs
         console.error(error);
@@ -80,14 +89,17 @@ export const updateTag = async (req, res) => {
     }
 };
 
-// Path     :   /api/tags/deleteTag
+// Path     :   /api/tags/deleteTag/:id
 // Method   :   Delete
 // Access   :   Private
 // Desc     :   Delete Tag
 
 export const deleteTag = async (req, res) => {
     try {
+
         const id = req.params.id;
+        const loggedInUserId = req.userId;
+
         console.log(id)
 
         let tag = await Tags.findOne({ _id: id });
@@ -95,9 +107,14 @@ export const deleteTag = async (req, res) => {
         if (!tag) {
             return res.status(404).json({ message: 'Tag not found' });
         }
-        await tag.deleteOne();
-        // Return a success response
-        res.json({ message: 'Tag deleted successfully',tag });
+        if(tag.creator = loggedInUserId){
+            await tag.deleteOne();
+            // Return a success response
+            res.json({ message: 'Tag deleted successfully',tag });
+        }else {
+            return res.status(401).json({ message: "Unauthorized User" });
+          }
+       
     } catch (err) {
         // Return an error response if an error occurs
         console.error(err);

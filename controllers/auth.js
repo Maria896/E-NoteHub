@@ -43,6 +43,7 @@ export const signup = async (req, res) => {
 			  success: true,
 			  error: false,
 			  message: "Signup successful. Please check your email to verify your account.",
+			  existedUser
 			});
 		  }
 		} else {
@@ -78,13 +79,13 @@ export const signup = async (req, res) => {
 // Desc     :   Verifiy email of new user
 export const verifyEmail = async (req, res) => {
 	try {
-		const id = req.params.id;
+		const token = req.params.token;
 		console.log(req.params.id);
-		const user = await User.find({ _id: id });
+		const user = await User.findOne({ verificationToken: token });
 		console.log(user);
 		if (!user) return res.status(404).json("Invalid link");
 		const verifiedUser = await User.findByIdAndUpdate(
-			id,
+			user._id,
 			{ isVerified: true },
 			{
 				new: true,
@@ -92,11 +93,12 @@ export const verifyEmail = async (req, res) => {
 		);
 		const workspace = await new Workspace({
 			name: `${user.fullName}Workspace`,
-			user: user._id,
+			creator: user._id,
 		}).save();
 		res.status(200).json({
 			message: "Your email has been verified successfully",
 			verifiedUser,
+			workspace
 		});
 	} catch (error) {
 		res.status(400).json({ message: "error", error });
@@ -165,8 +167,8 @@ const sendEmailVerificationLink = async (to, token, id) => {
 			host: 'smtp.ethereal.email',
 			port: 587,
 			auth: {
-				user: 'kaden.funk98@ethereal.email',
-				pass: 'arnQA8aucvc5cWKwwE'
+				user: 'joesph88@ethereal.email',
+				pass: 'Pcz5sGGFqsCrjDng7E'
 			}
 		});
 		await transporter.sendMail({

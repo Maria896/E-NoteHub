@@ -8,7 +8,8 @@ export const authHandler = (req, res, next) => {
      if (token) {
          token = token.split(" ")[1];
          let user = JWT.verify(token, process.env.JWT_SECRET);
-         req.userId = user.id;
+         req.userId = user._id;
+         //console.log(user)
          console.log("User ID:", req.userId);
          next();
      } else {

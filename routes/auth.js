@@ -4,7 +4,7 @@ import express from "express";
 const router = express.Router();
 
 router.post("/signup", signup);
-router.get('/verify/:id/:token', verifyEmail);
+router.get('/verify/:token', verifyEmail);
 router.post('/signin', signin);
 
 

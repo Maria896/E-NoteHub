@@ -24,12 +24,13 @@ app.use(express.json());
 app.use(cors());
 app.use("/api-docs", swaggerUI.serve, swaggerUI.setup(swaggerJSDocs));
 
-app.use("/api/tags",authHandler, tagRoutes);
-app.use("/api/notes", notesRoutes);
 app.use("/api/auth", authRoutes);
 app.use("/api/user",  userRoutes);
-app.use("/api/workspace", workspaceRoutes);
+app.use("/api/workspace",authHandler, workspaceRoutes);
+app.use("/api/tags",authHandler, tagRoutes);
+app.use("/api/notes", notesRoutes);
 app.use("/api/otp", otpRoutes);
+
 
 const PORT = process.env.PORT || 3000;
 app.listen(PORT, () => {

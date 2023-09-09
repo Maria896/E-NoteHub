@@ -32,7 +32,7 @@ export const addNote = async (req, res) => {
 			title : noteData.title,
 			answers : noteData.answers,
 			tags : tagIds,
-			user : loggedInUserId,
+			creator : loggedInUserId,
 			workspace : noteData.workspace
 		}).save();
 		// Return a success response
@@ -56,7 +56,7 @@ export const addNote = async (req, res) => {
 
 export const getAllNotes = async (req, res) => {
 	try {
-		const notes = await Notes.find({});
+		const notes = await Notes.find({creator: loggedInUserId});
 		// Return a success response
 		res.status(200).json({ success: true, error: false, notes });
 	} catch (error) {
@@ -73,26 +73,28 @@ export const updateNote = async (req, res) => {
 	try {
 		const id = req.params.id;
 		const { title, answers, tags } = req.body;
-		const fetchedTags = await Promise.all(
-			tags.map((tagName) => Tags.findOne({ name: tagName }))
-		);
-		const createdTags = await createNewTagsIfNotExist(tags);
-		// Combine fetched and created tags
-		const allChangedOrNewTags = [...fetchedTags, ...createdTags];
-		const tagIds = allChangedOrNewTags.map((tag) => tag._id);
-		const updatedNote = await Notes.findByIdAndUpdate(
-			id,
-			{ title: title, answers: answers, tags: tagIds },
-			{
-				new: true,
-			}
-		);
-
-		if (!updatedNote) {
+		const loggedInUserTags = await Tags.find({creator: loggedInUserId});
+		const noteToBeUpdated  = await Notes.findOne({creator:loggedInUserId});
+		if(noteToBeUpdated){
+			const fetchedTags = await Promise.all(
+				tags.map((tagName) => loggedInUserTags.findOne({ name: tagName }))
+			);
+			const createdTags = await createNewTagsIfNotExist(tags);
+			// Combine fetched and created tags
+			const allChangedOrNewTags = [...fetchedTags, ...createdTags];
+			const tagIds = allChangedOrNewTags.map((tag) => tag._id);
+			const updatedNote = await Notes.findByIdAndUpdate(
+				id,
+				{ title: title, answers: answers, tags: tagIds },
+				{
+					new: true,
+				}
+			);	
+			res.status(200).json({ message: "Note Updated Succesfully ",updatedNote});
+		}else
+		 {
 			return res.status(404).json({ message: "Note not found" });
-		}
-
-		res.status(200).json({ message: "Note Updated Succesfully " });
+		}	
 	} catch (error) {
 		console.error(error);
 		res.status(500).json({ message: "Server Error" });
@@ -106,17 +108,23 @@ export const updateNote = async (req, res) => {
 
 export const deleteNote = async (req, res) => {
 	try {
-		const { noteId } = req.params;
-		console.log(noteId);
+		const id = req.params.id;
+		const loggedInUserId = req.userId;
+		console.log(id);
 
-		let note = await Tags.findOne({ id: noteId });
+		let note = await Notes.findOne({ _id: id });
 		console.log(note);
 		if (!note) {
 			return res.status(404).json({ message: "Note not found" });
 		}
-		await note.deleteOne();
-		// Return a success response
-		res.json({ message: "Note deleted successfully" });
+		if(note.creator = loggedInUserId){
+			await note.deleteOne();
+			// Return a success response
+			res.json({ message: "Note deleted successfully" });
+		}else {
+            return res.status(401).json({ message: "Unauthorized User" });
+        }
+		
 	} catch (err) {
 		// Return an error response if an error occurs
 		console.error(err);

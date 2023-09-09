@@ -5,7 +5,7 @@ const tagsSchema = new mongoose.Schema({
     type: String,
     required: true,
   },
-  user:{
+  creator:{
     type: mongoose.Schema.Types.ObjectId,
     ref: 'User'
   },

@@ -17,7 +17,7 @@ const notesSchema = new mongoose.Schema({
       ref: 'Tags'
     }
   ],
-  user:{
+  creator:{
       type: mongoose.Schema.Types.ObjectId,
       ref: 'User'
     }
