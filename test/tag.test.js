@@ -12,6 +12,7 @@ describe("Tag Routes", function () {
     chai
       .request(app)
       .get("/api/tags/")
+      .set('Authorization', `Bearer ${loggedInUserToken}`)
       .end((err, res) => {
         res.should.have.status(200);
         done();
@@ -22,6 +23,7 @@ describe("Tag Routes", function () {
     chai
       .request(app)
       .post("/api/tags/add-tag/")
+      .set('Authorization', `Bearer ${loggedInUserToken}`)
       .send({ name: "Test Tag" })
       .end((err, res) => {
         if (err) {
@@ -42,6 +44,7 @@ describe("Tag Routes", function () {
     chai
       .request(app)
       .put(`/api/tags/update-tag/${createdTagId}`)
+      .set('Authorization', `Bearer ${loggedInUserToken}`)
       .send(updatedTagData)
       .end((err, res) => {
         res.should.have.status(200);
@@ -54,6 +57,7 @@ describe("Tag Routes", function () {
     chai
       .request(app)
       .put(`/api/tags/update-tag/${invalidTagId}`)
+      .set('Authorization', `Bearer ${loggedInUserToken}`)
       .send(updatedTagData)
       .end((err, res) => {
         res.should.have.status(404);
@@ -65,6 +69,7 @@ describe("Tag Routes", function () {
     chai
       .request(app)
       .delete(`/api/tags/delete-tag/${createdTagId}`)
+      .set('Authorization', `Bearer ${loggedInUserToken}`)
       .end((err, res) => {
         res.should.have.status(200);
         done();
@@ -75,6 +80,7 @@ describe("Tag Routes", function () {
     chai
       .request(app)
       .delete(`/api/tags/delete-tag/${invalidTagId}`)
+      .set('Authorization', `Bearer ${loggedInUserToken}`)
       .end((err, res) => {
         res.should.have.status(404);
         done();

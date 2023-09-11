@@ -1,25 +1,29 @@
 import chai from "chai";
 import chaiHttp from "chai-http";
 import app from "../script.js";
+import { loggedInUserToken } from "./auth.test.js";
 const should = chai.should();
 
 chai.use(chaiHttp);
 let createdWorkspaceId;
+// console.log(`User token: ${loggedInUserToken}`)
 describe("Workspace Routes", function () {
 	it("should return a list of workspaces", function (done) {
 		chai
 			.request(app)
 			.get("/api/workspace/")
+			.set('Authorization', `Bearer ${loggedInUserToken}`)
 			.end((err, res) => {
 				res.should.have.status(200);
 				done();
 			});
 	}).timeout(10000);
-	
+
 	it("should create a new workspace", function (done) {
 		chai
 			.request(app)
 			.post("/api/workspace/add-workspace/")
+			.set('Authorization', `Bearer ${loggedInUserToken}`)
 			.send({ name: "Test Workspace" })
 			.end((err, res) => {
 				if (err) {
@@ -43,6 +47,7 @@ describe("Workspace Routes", function () {
 		chai
 			.request(app)
 			.put(`/api/workspace/update-workspace/${createdWorkspaceId}`)
+			.set('Authorization', `Bearer ${loggedInUserToken}`)
 			.send(updatedWorkspaceData)
 			.end((err, res) => {
 				res.should.have.status(200);
@@ -55,6 +60,7 @@ describe("Workspace Routes", function () {
 		chai
 			.request(app)
 			.put(`/api/workspace/update-workspace/${invalidWorkspaceId}`)
+			.set('Authorization', `Bearer ${loggedInUserToken}`)
 			.send(updatedWorkspaceData)
 			.end((err, res) => {
 				res.should.have.status(404);
@@ -67,6 +73,7 @@ describe("Workspace Routes", function () {
 		chai
 			.request(app)
 			.put(`/api/workspace/add-collaborator/${createdWorkspaceId}`)
+			.set('Authorization', `Bearer ${loggedInUserToken}`)
 			.send({ email: collaboratorEmail })
 			.end((err, res) => {
 				res.should.have.status(200);
@@ -78,6 +85,7 @@ describe("Workspace Routes", function () {
 		chai
 			.request(app)
 			.delete(`/api/workspace/delete-workspace/${createdWorkspaceId}`)
+			.set('Authorization', `Bearer ${loggedInUserToken}`)
 			.end((err, res) => {
 				res.should.have.status(200);
 				done();
@@ -88,6 +96,7 @@ describe("Workspace Routes", function () {
 		chai
 			.request(app)
 			.delete(`/api/workspace/delete-workspace/${invalidWorkspaceId}`)
+			.set('Authorization', `Bearer ${loggedInUserToken}`)
 			.end((err, res) => {
 				res.should.have.status(404);
 				done();

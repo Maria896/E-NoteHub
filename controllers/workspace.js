@@ -150,22 +150,28 @@ export const addCollaborator = async (req, res) => {
         return res.status(404).json({ message: "Workspace not found." });
       }
       if ((workspaceData.creator = loggedInUserId)) {
-        const newCollaborators = [
-          ...workspaceData.collaborators,
-          collaborator.id,
-        ];
-        const addCol = await Workspaces.findByIdAndUpdate(
-          workspaceId,
-          { collaborators: newCollaborators },
-          {
-            new: true,
-          }
-        );
-        await sendEmailToCollaborator(collaborator.email);
-        // Return a success response
-        return res
-          .status(200)
-          .json({ addCol, message: "Collaborator added successfully." });
+
+        if(!workspaceData.collaborators.includes(collaborator._id)){
+          const newCollaborators = [
+            ...workspaceData.collaborators,
+            collaborator.id,
+          ];
+          const addCol = await Workspaces.findByIdAndUpdate(
+            workspaceId,
+            { collaborators: newCollaborators },
+            {
+              new: true,
+            }
+          );
+          await sendEmailToCollaborator(collaborator.email);
+          // Return a success response
+          return res
+            .status(200)
+            .json({ addCol, message: "Collaborator added successfully." });
+        }else{
+          return res.json({ message: "Already exists" });
+        }
+        
       } else {
         return res.status(401).json({ message: "Unauthorized User" });
       }

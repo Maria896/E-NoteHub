@@ -1,6 +1,7 @@
 import Notes from "../schemas/notesSchema.js";
 import { getAllTags, addTag } from "../controllers/tag.js";
 import Tags from "../schemas/tagsSchema.js";
+import Workspaces from "../schemas/workspaceSchema.js"
 import mongoose from "mongoose";
 import joiNotesSchema from "../joiSchemas/notesSchema.js"
 
@@ -14,34 +15,42 @@ export const addNote = async (req, res) => {
 		const newTags = req.body.tags;
 		const noteData = req.body;
 		const loggedInUserId = req.userId;
-		const workspaceId = req.workspaceId
+		console.log(loggedInUserId)
+		//const workspaceId = req.workspaceId
         const { error, value } = joiNotesSchema.validate(noteData, { abortEarly: false });
 	  
 		if (error) {
 		  const errorMessage = error.details.map((detail) => detail.message);
 		  return res.status(400).json({ success: false, error: errorMessage });
 		}
-		const createdTags = await createNewTagsIfNotExist(newTags);
-		const allTags = await Tags.find({});
+		const createdTags = await createNewTagsIfNotExist(newTags,loggedInUserId );
+		const allTags = await Tags.find({creator: loggedInUserId});
 		const allSelectedOrNewTags = allTags.filter((obj) =>
 			newTags.includes(obj.name)
 		);
 
 		const tagIds = allSelectedOrNewTags.map((tag) => tag._id);
-		const newNote = await new Notes({
-			title : noteData.title,
-			answers : noteData.answers,
-			tags : tagIds,
-			creator : loggedInUserId,
-			workspace : noteData.workspace
-		}).save();
-		// Return a success response
-		return res.status(200).json({
-			success: true,
-			error: false,
-			message: "Note Added Successfully",
-			newNote
-		});
+		const checkAuthorizedUserWorkspace = await Workspaces.findOne({_id: noteData.workspace});
+		console.log(checkAuthorizedUserWorkspace)
+		if(checkAuthorizedUserWorkspace){
+			const newNote = await new Notes({
+				title : noteData.title,
+				answers : noteData.answers,
+				tags : tagIds,
+				creator : loggedInUserId,
+				workspace : noteData.workspace
+			}).save();
+			// Return a success response
+			return res.status(200).json({
+				success: true,
+				error: false,
+				message: "Note Added Successfully",
+				newNote
+			});
+		}else{
+			return res.status(401).json({ message: "Unauthorized User" });s
+		}
+		
 	} catch (error) {
 		// Return an error response if an error occurs
 		console.error(error);
@@ -79,7 +88,7 @@ export const updateNote = async (req, res) => {
 			const fetchedTags = await Promise.all(
 				tags.map((tagName) => loggedInUserTags.findOne({ name: tagName }))
 			);
-			const createdTags = await createNewTagsIfNotExist(tags);
+			const createdTags = await createNewTagsIfNotExist(tags,loggedInUserId);
 			// Combine fetched and created tags
 			const allChangedOrNewTags = [...fetchedTags, ...createdTags];
 			const tagIds = allChangedOrNewTags.map((tag) => tag._id);
@@ -134,7 +143,8 @@ export const deleteNote = async (req, res) => {
 
 // Function for checking if  tag name already exists if not create new tag
 
-const createNewTagsIfNotExist = async (newTags) => {
+const createNewTagsIfNotExist = async (newTags,loggedInUserId) => {
+
 	//const existedTags = await Tags.find({});
 	let tags = [];
 	for (const tagName of newTags) {
@@ -144,7 +154,7 @@ const createNewTagsIfNotExist = async (newTags) => {
 
 		if (!tagExists) {
 			// Create a new tag in the database
-			const newTag = { name: tagName };
+			const newTag = { name: tagName , creator: loggedInUserId};
 			new Tags(newTag).save();
 			tags.push(newTag.name);
 

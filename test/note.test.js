@@ -1,7 +1,7 @@
 import chai from "chai";
 import chaiHttp from "chai-http";
 import app from "../script.js";
-import { loggedInUserId } from "./auth.test.js";
+import { loggedInUserToken } from "./auth.test.js";
 
 const should = chai.should();
 
@@ -18,6 +18,7 @@ describe("Notes Routes", function () {
 		chai
 			.request(app)
 			.post("/api/workspace/add-workspace/")
+            .set('Authorization', `Bearer ${loggedInUserToken}`)
 			.send({ name: "Test Workspace" })
 			.end((err, res) => {
 				if (err) {
@@ -36,6 +37,7 @@ describe("Notes Routes", function () {
         chai
           .request(app)
           .post("/api/tags/add-tag/")
+          .set('Authorization', `Bearer ${loggedInUserToken}`)
           .send({ name: "Test Tag 1" })
           .end((err, res) => {
             if (err) {
@@ -54,6 +56,7 @@ describe("Notes Routes", function () {
         chai
           .request(app)
           .post("/api/tags/add-tag/")
+          .set('Authorization', `Bearer ${loggedInUserToken}`)
           .send({ name: "Test Tag 2" })
           .end((err, res) => {
             if (err) {
@@ -79,6 +82,7 @@ describe("Notes Routes", function () {
     chai
       .request(app)
       .get("/api/notes/")
+      .set('Authorization', `Bearer ${loggedInUserToken}`)
       .end((err, res) => {
         res.should.have.status(200);
         done();
@@ -90,6 +94,7 @@ describe("Notes Routes", function () {
       .request(app)
       .post("/api/notes/add-note")
       .send(testNote)
+      .set('Authorization', `Bearer ${loggedInUserToken}`)
       .end((err, res) => {
         if (err) {
           console.error(err);
@@ -114,6 +119,7 @@ describe("Notes Routes", function () {
     chai
       .request(app)
       .put(`/api/notes/update-note/${createdNoteId}`)
+      .set('Authorization', `Bearer ${loggedInUserToken}`)
       .send(updatedNoteData)
       .end((err, res) => {
         res.should.have.status(200);
@@ -126,6 +132,7 @@ describe("Notes Routes", function () {
     chai
       .request(app)
       .put(`/api/notes/update-note/${invalidNoteId}`)
+      .set('Authorization', `Bearer ${loggedInUserToken}`)
       .send(updatedNoteData)
       .end((err, res) => {
         res.should.have.status(404);
@@ -137,6 +144,7 @@ describe("Notes Routes", function () {
     chai
       .request(app)
       .delete(`/api/notes/delete-note/${createdNoteId}`)
+      .set('Authorization', `Bearer ${loggedInUserToken}`)
       .end((err, res) => {
         res.should.have.status(200);
         done();
@@ -147,6 +155,7 @@ describe("Notes Routes", function () {
     chai
       .request(app)
       .delete(`/api/notes/delete-note/${invalidNoteId}`)
+      .set('Authorization', `Bearer ${loggedInUserToken}`)
       .end((err, res) => {
         res.should.have.status(404);
         done();

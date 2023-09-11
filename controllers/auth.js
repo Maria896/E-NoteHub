@@ -80,7 +80,7 @@ export const signup = async (req, res) => {
 export const verifyEmail = async (req, res) => {
 	try {
 		const token = req.params.token;
-		console.log(req.params.id);
+	
 		const user = await User.findOne({ verificationToken: token });
 		console.log(user);
 		if (!user) return res.status(404).json("Invalid link");
