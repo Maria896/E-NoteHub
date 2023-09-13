@@ -1,7 +1,7 @@
 import chai from "chai";
 import chaiHttp from "chai-http";
 import app from "../script.js";
-import { loggedInUserToken } from "./auth.test.js";
+import { loggedInUserId, loggedInUserToken } from "./auth.test.js";
 const should = chai.should();
 
 chai.use(chaiHttp);

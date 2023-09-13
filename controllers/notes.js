@@ -30,9 +30,9 @@ export const addNote = async (req, res) => {
 		);
 
 		const tagIds = allSelectedOrNewTags.map((tag) => tag._id);
-		const checkAuthorizedUserWorkspace = await Workspaces.findOne({_id: noteData.workspace});
-		console.log(checkAuthorizedUserWorkspace)
-		if(checkAuthorizedUserWorkspace){
+		// const checkAuthorizedUserWorkspace = await Workspaces.findOne({_id: noteData.workspace});
+		// console.log(checkAuthorizedUserWorkspace)
+		
 			const newNote = await new Notes({
 				title : noteData.title,
 				answers : noteData.answers,
@@ -47,9 +47,7 @@ export const addNote = async (req, res) => {
 				message: "Note Added Successfully",
 				newNote
 			});
-		}else{
-			return res.status(401).json({ message: "Unauthorized User" });s
-		}
+		
 		
 	} catch (error) {
 		// Return an error response if an error occurs
@@ -65,6 +63,7 @@ export const addNote = async (req, res) => {
 
 export const getAllNotes = async (req, res) => {
 	try {
+		const loggedInUserId = req.userId;
 		const notes = await Notes.find({creator: loggedInUserId});
 		// Return a success response
 		res.status(200).json({ success: true, error: false, notes });
@@ -80,18 +79,24 @@ export const getAllNotes = async (req, res) => {
 // Desc     :   Update Note
 export const updateNote = async (req, res) => {
 	try {
+		const loggedInUserId = req.userId;
 		const id = req.params.id;
 		const { title, answers, tags } = req.body;
-		const loggedInUserTags = await Tags.find({creator: loggedInUserId});
+		
 		const noteToBeUpdated  = await Notes.findOne({creator:loggedInUserId});
 		if(noteToBeUpdated){
-			const fetchedTags = await Promise.all(
-				tags.map((tagName) => loggedInUserTags.findOne({ name: tagName }))
-			);
+			const fetchedTags = await Tags.find({
+				creator: loggedInUserId,
+				name: { $in: tags }
+			  });
+			console.log(`Fetch Tags ${fetchedTags}`)
 			const createdTags = await createNewTagsIfNotExist(tags,loggedInUserId);
+			console.log(createdTags)
 			// Combine fetched and created tags
 			const allChangedOrNewTags = [...fetchedTags, ...createdTags];
+			console.log(allChangedOrNewTags)
 			const tagIds = allChangedOrNewTags.map((tag) => tag._id);
+			console.log(tagIds)
 			const updatedNote = await Notes.findByIdAndUpdate(
 				id,
 				{ title: title, answers: answers, tags: tagIds },
@@ -146,7 +151,8 @@ export const deleteNote = async (req, res) => {
 const createNewTagsIfNotExist = async (newTags,loggedInUserId) => {
 
 	//const existedTags = await Tags.find({});
-	let tags = [];
+	let createdTagNames = [];
+	let createdTags= [];
 	for (const tagName of newTags) {
 		// Check if the tag name already exists
 		const tagExists = await Tags.findOne({ name: tagName });
@@ -154,14 +160,15 @@ const createNewTagsIfNotExist = async (newTags,loggedInUserId) => {
 
 		if (!tagExists) {
 			// Create a new tag in the database
-			const newTag = { name: tagName , creator: loggedInUserId};
-			new Tags(newTag).save();
-			tags.push(newTag.name);
+			const createdTag = { name: tagName , creator: loggedInUserId};
+			new Tags(createdTag).save();
+			createdTags.push(createdTag);
+			createdTagNames.push(createdTag.name);
 
 			console.log(`New tag "${tagName}" created in the database.`);
 		} else {
 			console.log(`Tag "${tagName}" already exists.`);
 		}
 	}
-	return newTags;
+	return createdTags;
 };
